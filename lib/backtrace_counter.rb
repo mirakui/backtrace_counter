@@ -42,6 +42,7 @@ module BacktraceCounter
 
   def inc(method, backtrace)
     bt = filtered_backtrace(backtrace)
+    return if bt.empty?
     hash = "#{method}/#{bt.hash}"
     backtraces[hash] ||= {
       method: method,
