@@ -10,11 +10,13 @@ module BacktraceCounter
       raise RuntimeError, 'Please set :printer' unless @config[:printer]
 
       result = nil
-      BacktraceCounter.start(@config[:methods]) do
+      BacktraceCounter.set_backtrace_filter &@config[:backtrace_filter]
+      BacktraceCounter.start(*@config[:methods]) do
         result = @app.call(env)
       end
       @config[:printer].print BacktraceCounter.backtraces
       BacktraceCounter.clear
+      BacktraceCounter.set_backtrace_filter {|v| true }
       result
     end
   end
