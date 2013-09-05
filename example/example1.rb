@@ -23,3 +23,15 @@ end
 
 printer = BacktraceCounter::CsvPrinter.new
 printer.print BacktraceCounter.backtraces
+__END__
+> ruby example/example1.rb
+Foo#foo,100,"example/example1.rb:6:in `foo'
+example/example1.rb:20:in `block (2 levels) in <main>'
+example/example1.rb:20:in `times'
+example/example1.rb:20:in `block in <main>'
+example/example1.rb:18:in `<main>'"
+Bar#bar,200,"example/example1.rb:12:in `bar'
+example/example1.rb:21:in `block (2 levels) in <main>'
+example/example1.rb:21:in `times'
+example/example1.rb:21:in `block in <main>'
+example/example1.rb:18:in `<main>'"
