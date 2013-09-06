@@ -29,23 +29,33 @@ module BacktraceCounter
     @backtraces = {}
   end
 
+  def set_backtrace_filter(&block)
+    @backtrace_filter = block
+  end
+
+  def filtered_backtrace(backtrace)
+    backtrace.select {|line| !@backtrace_filter || @backtrace_filter.call(line) }
+  end
+
   def trace_func(methods)
+    get_class = Kernel.instance_method(:class)
     lambda do |tp|
-      _method = if tp.self.is_a?(Class)
+      klass = get_class.bind(tp.self).call
+      method = if klass == Class
                   "#{tp.self}.##{tp.method_id}"
                 else
-                  "#{tp.self.class}##{tp.method_id}"
+                  "#{klass}##{tp.method_id}"
                 end
-      methods.each do |method|
-        if (method.is_a?(Regexp) && _method =~ method) || _method == method
-          inc _method, caller(3)
+      methods.each do |method_to_trace|
+        if method_to_trace === method
+          record method, caller(3)
           break
         end
       end
     end
   end
 
-  def inc(method, backtrace)
+  def record(method, backtrace)
     bt = filtered_backtrace(backtrace)
     return if bt.empty?
     hash = "#{method}/#{bt.hash}"
@@ -57,11 +67,4 @@ module BacktraceCounter
     backtraces[hash][:count] += 1
   end
 
-  def set_backtrace_filter(&block)
-    @backtrace_filter = block
-  end
-
-  def filtered_backtrace(backtrace)
-    backtrace.select {|line| !@backtrace_filter || @backtrace_filter.call(line) }
-  end
 end
