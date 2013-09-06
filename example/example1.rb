@@ -15,7 +15,7 @@ class Bar
 end
 
 BacktraceCounter.set_backtrace_filter {|line| line =~ %r(#{__FILE__}) }
-BacktraceCounter.start('Foo#foo', 'Bar#bar') do
+BacktraceCounter.start('Foo#foo', 'Bar.#bar') do
   a = Foo.new
   100.times { a.foo }
   200.times { Bar.bar }

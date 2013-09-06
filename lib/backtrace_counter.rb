@@ -7,8 +7,9 @@ module BacktraceCounter
   module_function
 
   def start(*methods)
+    raise RuntimeError, 'BacktraceCounter is already running' if @trace
     clear
-    ::Kernel.set_trace_func trace_func(methods)
+    @trace = TracePoint.trace(:call, &trace_func(methods))
     if block_given?
       yield
       stop
@@ -16,7 +17,8 @@ module BacktraceCounter
   end
 
   def stop
-    set_trace_func nil
+    @trace.disable
+    @trace = nil
   end
 
   def backtraces
@@ -28,9 +30,12 @@ module BacktraceCounter
   end
 
   def trace_func(methods)
-    lambda do |event, file, line, id, binding, klass|
-      _method = "#{klass}##{id}"
-      next unless event == 'call'
+    lambda do |tp|
+      _method = if tp.self.is_a?(Class)
+                  "#{tp.self}.##{tp.method_id}"
+                else
+                  "#{tp.self.class}##{tp.method_id}"
+                end
       methods.each do |method|
         if (method.is_a?(Regexp) && _method =~ method) || _method == method
           inc _method, caller(3)
