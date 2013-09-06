@@ -11,8 +11,11 @@ module BacktraceCounter
     clear
     @trace = TracePoint.trace(:call, &trace_func(methods))
     if block_given?
-      yield
-      stop
+      begin
+        yield
+      ensure
+        stop
+      end
     end
   end
 
