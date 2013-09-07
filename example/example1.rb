@@ -14,11 +14,19 @@ class Bar
   end
 end
 
+module Baz
+  module_function
+  def baz
+    'baz'
+  end
+end
+
 BacktraceCounter.set_backtrace_filter {|line| line =~ %r(#{__FILE__}) }
-BacktraceCounter.start('Foo#foo', 'Bar.#bar') do
+BacktraceCounter.start('Foo#foo', 'Bar.#bar', 'Baz.#baz') do
   a = Foo.new
-  100.times { a.foo }
-  200.times { Bar.bar }
+  10.times { a.foo }
+  20.times { Bar.bar }
+  30.times { Baz.baz }
 end
 
 printer = BacktraceCounter::CsvPrinter.new

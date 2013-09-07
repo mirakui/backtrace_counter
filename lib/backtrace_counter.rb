@@ -44,7 +44,7 @@ module BacktraceCounter
     get_class = Kernel.instance_method(:class)
     lambda do |tp|
       klass = get_class.bind(tp.self).call
-      method = if klass == Class
+      method = if klass == Class || klass == Module
                   "#{tp.self}.##{tp.method_id}"
                 else
                   "#{klass}##{tp.method_id}"
