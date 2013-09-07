@@ -9,7 +9,8 @@ module BacktraceCounter
   def start(*methods)
     raise RuntimeError, 'BacktraceCounter is already running' if @trace
     clear
-    @trace = TracePoint.trace(:call, &trace_func(methods))
+    @trace = trace_point(methods)
+    @trace.enable
     if block_given?
       begin
         yield
@@ -40,9 +41,9 @@ module BacktraceCounter
     backtrace.select {|line| !@backtrace_filter || @backtrace_filter.call(line) }
   end
 
-  def trace_func(methods)
+  def trace_point(methods)
     get_class = Kernel.instance_method(:class)
-    lambda do |tp|
+    TracePoint.new(:call) do |tp|
       klass = get_class.bind(tp.self).call
       method = if klass == Class || klass == Module
                   "#{tp.self}.##{tp.method_id}"
