@@ -6,6 +6,9 @@ describe BacktraceCounter do
     end
     def self.class_method1
     end
+    def self.class
+      raise 'boom!'
+    end
   end
   module Mod
     module_function
