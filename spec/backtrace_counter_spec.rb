@@ -1,56 +1,51 @@
 require 'backtrace_counter'
 
 describe BacktraceCounter do
+  class Cls
+    def instance_method1
+    end
+    def self.class_method1
+    end
+  end
+  module Mod
+    module_function
+    def module_method1
+    end
+  end
 
   describe '.start' do
     describe 'with block' do
-
-      let(:bt) do
-        o = Object.new
-        def o.foo
-          'bar'
+      before do
+        obj = Cls.new
+        BacktraceCounter.start /^Cls/, /^Mod/ do
+          10.times { obj.instance_method1 }
+          20.times { Cls.class_method1 }
+          30.times { Mod.module_method1 }
         end
-        def o.class
-          raise 'boom!'
-        end
-        o
-
-        BacktraceCounter.start /foo/ do
-          o.foo
-          2.times { o.foo }
-        end
-        BacktraceCounter.backtraces
       end
+      let (:bt) { BacktraceCounter.backtraces }
 
-      it 'traces 2 method calls' do
-        expect(bt.length).to eq(2)
-      end
+      it { expect(bt.length).to eq(3) }
 
-      describe 'with the first item' do
+      describe 'reports instance method' do
         let(:item) { bt[bt.keys[0]] }
-        it 'reports :method is Object#foo' do
-          expect(item[:method]).to eq('Object#foo')
-        end
-        it 'reports :count is 1' do
-          expect(item[:count]).to eq(1)
-        end
-        it 'reports :backtrace is an array with some items' do
-          expect(item[:backtrace].length).to be >= 0
-        end
+        it { expect(item[:method]).to eq('Cls#instance_method1') }
+        it { expect(item[:count]).to eq(10) }
+        it { expect(item[:backtrace].length).to be > 0 }
       end
 
-      describe 'withn the first item' do
+      describe 'reports class method' do
         let(:item) { bt[bt.keys[1]] }
-        it ':method is Object#foo' do
-          expect(item[:method]).to eq('Object#foo')
-        end
+        it { expect(item[:method]).to eq('Cls.#class_method1') }
+        it { expect(item[:count]).to eq(20) }
+        it { expect(item[:backtrace].length).to be > 0 }
+      end
 
-        it ':count is 2' do
-          expect(item[:count]).to eq(2)
-        end
-        it 'reports :backtrace is an array with some items' do
-          expect(item[:backtrace].length).to be >= 0
-        end
+      describe 'reports module method' do
+        let(:item) { bt[bt.keys[2]] }
+        it { expect(item[:method]).to eq('Mod.#module_method1') }
+        it { expect(item[:count]).to eq(30) }
+        it { expect(item[:backtrace].length).to be > 0 }
       end
     end
   end
