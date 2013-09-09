@@ -14,7 +14,7 @@ module BacktraceCounter
       BacktraceCounter.start(*@config[:methods]) do
         result = @app.call(env)
       end
-      @config[:printer].print BacktraceCounter.backtraces
+      @config[:printer].print BacktraceCounter.stats
       BacktraceCounter.clear
       BacktraceCounter.set_backtrace_filter {|v| true }
       result

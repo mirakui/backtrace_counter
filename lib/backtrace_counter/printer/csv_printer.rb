@@ -5,7 +5,7 @@ module BacktraceCounter
   class CsvPrinter < Printer
     def print(backtraces)
       print_block do |output|
-        backtraces.values.each do |bt|
+        backtraces.each do |bt|
           output.write CSV.generate_line([
             bt[:method],
             bt[:count],

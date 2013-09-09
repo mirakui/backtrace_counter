@@ -7,7 +7,7 @@ module BacktraceCounter
   module_function
 
   def start(*methods)
-    raise RuntimeError, 'BacktraceCounter is already running' if @trace
+    return warn 'BacktraceCounter is already running' if @trace
     clear
     @trace = trace_point(methods)
     @trace.enable
@@ -23,6 +23,13 @@ module BacktraceCounter
   def stop
     @trace.disable
     @trace = nil
+  end
+
+  def stats
+    a = @backtraces.values
+    a.sort_by! { |item| item[:count] }
+    a.reverse!
+    a
   end
 
   def backtraces
@@ -48,7 +55,7 @@ module BacktraceCounter
                 end
       methods.each do |method_to_trace|
         if method_to_trace === method
-          record method, caller(3)
+          record method, caller(3, 20)
           break
         end
       end
