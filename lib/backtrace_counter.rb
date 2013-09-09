@@ -37,10 +37,6 @@ module BacktraceCounter
     @backtrace_filter = block
   end
 
-  def filtered_backtrace(backtrace)
-    backtrace.select {|line| !@backtrace_filter || @backtrace_filter.call(line) }
-  end
-
   def trace_point(methods)
     get_class = Kernel.instance_method(:class)
     TracePoint.new(:call) do |tp|
@@ -60,7 +56,7 @@ module BacktraceCounter
   end
 
   def record(method, backtrace)
-    bt = filtered_backtrace(backtrace)
+    bt = backtrace.select(&(@backtrace_filter || -> line { true }))
     return if bt.empty?
     hash = "#{method}/#{bt.hash}"
     backtraces[hash] ||= {
