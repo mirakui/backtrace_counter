@@ -67,7 +67,7 @@ module BacktraceCounter
   end
 
   def record(method)
-    bt = caller(2, @depth).select(&(@backtrace_filter || -> line { true }))
+    bt = caller(2, @depth || 10000).select(&(@backtrace_filter || -> line { true }))
     return if bt.empty?
     hash = "#{method}/#{bt.hash}"
     backtraces[hash] ||= {
