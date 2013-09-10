@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/mirakui/backtrace_counter.png?branch=master)](https://travis-ci.org/mirakui/backtrace_counter)
+
 # BacktraceCounter
 
 TODO: Write a gem description
