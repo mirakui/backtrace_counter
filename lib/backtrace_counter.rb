@@ -40,6 +40,10 @@ module BacktraceCounter
     @backtraces = {}
   end
 
+  def set_caller_depth(depth)
+    @depth = depth
+  end
+
   def set_backtrace_filter(&block)
     @backtrace_filter = block
   end
@@ -55,15 +59,15 @@ module BacktraceCounter
                 end
       methods.each do |method_to_trace|
         if method_to_trace === method
-          record method, caller(3, 20)
+          record method
           break
         end
       end
     end
   end
 
-  def record(method, backtrace)
-    bt = backtrace.select(&(@backtrace_filter || -> line { true }))
+  def record(method)
+    bt = caller(2, @depth).select(&(@backtrace_filter || -> line { true }))
     return if bt.empty?
     hash = "#{method}/#{bt.hash}"
     backtraces[hash] ||= {

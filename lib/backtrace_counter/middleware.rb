@@ -11,6 +11,7 @@ module BacktraceCounter
 
       result = nil
       BacktraceCounter.set_backtrace_filter &@config[:backtrace_filter]
+      BacktraceCounter.set_caller_depth @config[:caller_depth]
       BacktraceCounter.start(*@config[:methods]) do
         result = @app.call(env)
       end
